@@ -32,6 +32,10 @@ async function getConnectionPath(person1, person2) {
     return { degrees: p2.degrees, path };
 }
 
+async function buildPath(degrees, p1Connections, p2Connections) {
+    return [];
+}
+
 async function getData(path) {
     const response = await axios.get(path);
     return response.data;
