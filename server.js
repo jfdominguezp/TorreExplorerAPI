@@ -21,7 +21,7 @@ router.use(bodyParser.json());
 router.post('/path', async (request, response) => {
     try {
         const { person1, person2 } = request.body;
-        if (!publicId1 || !publicId2) response.sendStatus(400);
+        if (!person1 || !person2) response.sendStatus(400);
 
         const path = await getConnectionPath(publicId1, publicId2);
         response.send(path);
