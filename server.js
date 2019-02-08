@@ -14,17 +14,17 @@ router.use(bodyParser.json());
 /**
  * Required structure in request body:
  * {
- *    person1: { publicId, name },
- *    person2: { publicId, name }
+ *    publicId1,
+ *    publicId2
  * }
  */
 router.post('/path', async (request, response) => {
     try {
-        const { person1: p1, person2: p2 } = request.body;
-        if (!p1 || !p1 || !p1.publicId || !p1.name || !p2.publicId || !p2.name) {
+        const { publicId1, publicId2 } = request.body;
+        if (!publicId1 || !publicId2) {
             response.sendStatus(400);
         }
-        const path = await getConnectionPath(p1, p2);
+        const path = await getConnectionPath(publicId1, publicId2);
         response.send(path);
     } catch (error) {
         const status = error.status || 500;
