@@ -13,7 +13,9 @@ const { fetchBios, fetchBiosAndExportToCSV }     = require('./functions/bios');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-
+/**
+ * publicId param required in the routhe path
+ */
 router.get('/top/:publicId', async (request, response) => {
     try {
         const limit = request.query.limit || 20;
