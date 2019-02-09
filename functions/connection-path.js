@@ -2,10 +2,6 @@ const axios = require('axios');
 
 const BASE_PATH = 'https://torre.bio/api';
 
-module.exports = {
-    getConnectionPath
-}
-
 /**
  * Logic flow for finding the path that connects two people in the Torre network
  * @param {string} publicId1 - Public Id of the person of reference
@@ -98,3 +94,5 @@ async function getData(path) {
     const response = await axios.get(path);
     return response.data;
 }
+
+module.exports = getConnectionPath;
