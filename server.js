@@ -1,9 +1,11 @@
 const express    = require('express');
 const cors       = require('cors');
 const bodyParser = require('body-parser');
+const validator  = require('email-validator');
+const mail       = require('./functions/mail');
 
-const getConnectionPath = require('./functions/connection-path');
-const fetchBios = require('./functions/bios');
+const getConnectionPath           = require('./functions/connection-path');
+const { fetchBiosAndExportToCSV } = require('./functions/bios');
 
 const port   = process.env.PORT || 3000;
 const app    = express();
@@ -33,12 +35,35 @@ router.post('/connections', async (request, response) => {
     }
 });
 
+/**
+ * Required structure in request body:
+ * {
+ *    ids: [string],
+ *    email: string
+ * }
+ */
 router.post('/export', async (request, response) => {
     try {
-        const { ids } = request.body;
-        if (!ids || !ids.length) return response.sendStatus(400);
-        const data = await fetchBios(ids);
-        return response.status(200).send(data);
+        const { ids, email } = request.body;
+
+        if (!ids || !ids.length || !email || !validator.validate(email)) {
+            return response.sendStatus(400);
+        }
+        
+        const csv = await fetchBiosAndExportToCSV(ids);
+
+        const mailOptions = {
+            from: 'pruebatorre.co@gmail.com',
+            to: email,
+            subject: 'Your Torre export',
+            html: "<p>Here's your Torre export :)</p>",
+            attachments: [ { path: csv } ]
+        };
+
+        mail.sendMail(mailOptions, (error, data) => {
+            if (error) throw error;
+            return response.status(200).send(data);
+        });
     } catch (error) {
         console.log(error);
         const status = error.status || 500;
