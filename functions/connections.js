@@ -3,6 +3,20 @@ const axios = require('axios');
 const BASE_PATH = 'https://torre.bio/api';
 
 /**
+ * Retrieves the connections of a given publicId, sorts them by reputation weight, 
+ * and returns the number of elements specified by the limit param.
+ * @param {string} publicId 
+ * @param {number} limit 
+ */
+async function getSortedConnections(publicId, limit) {
+    const connections = await getData(`${BASE_PATH}/people/${publicId}/connections`);
+    const sortedConnections = connections.sort((a, b) => {
+        return b.person.weight - a.person.weight;
+    });
+    return sortedConnections.slice(0, limit);
+}
+
+/**
  * Logic flow for finding the path that connects two people in the Torre network
  * @param {string} publicId1 - Public Id of the person of reference
  * @param {string} publicId2 - Public Id of the person to find
@@ -95,4 +109,7 @@ async function getData(path) {
     return response.data;
 }
 
-module.exports = getConnectionPath;
+module.exports = {
+    getSortedConnections,
+    getConnectionPath
+};

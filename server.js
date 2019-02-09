@@ -3,16 +3,31 @@ const cors       = require('cors');
 const bodyParser = require('body-parser');
 const validator  = require('email-validator');
 const mail       = require('./functions/mail');
+const port       = process.env.PORT || 3000;
+const app        = express();
+const router     = express.Router();
 
-const getConnectionPath           = require('./functions/connection-path');
-const { fetchBiosAndExportToCSV } = require('./functions/bios');
-
-const port   = process.env.PORT || 3000;
-const app    = express();
-const router = express.Router();
+const { getConnectionPath, getSortedConnections} = require('./functions/connections');
+const { fetchBios, fetchBiosAndExportToCSV }     = require('./functions/bios');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+
+
+router.get('/top/:publicId', async (request, response) => {
+    try {
+        const limit = request.query.limit || 20;
+        const { publicId } = request.params;
+        if (!publicId) return response.sendStatus(400);
+        const connections = await getSortedConnections(publicId, limit);
+        const ids = connections.map(({ person: { publicId } }) => publicId);
+        const bios = await fetchBios(ids);
+        return response.status(200).json(bios);
+    } catch (error) {
+        const status = error.status || 500;
+        response.status(status).json(error);
+    }
+});
 
 /**
  * Required structure in request body:
@@ -49,7 +64,7 @@ router.post('/export', async (request, response) => {
         if (!ids || !ids.length || !email || !validator.validate(email)) {
             return response.sendStatus(400);
         }
-        
+
         const csv = await fetchBiosAndExportToCSV(ids);
 
         const mailOptions = {
